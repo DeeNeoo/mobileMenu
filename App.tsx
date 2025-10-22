@@ -26,18 +26,16 @@ export default function App() {
     const newDish = { name, description, price, category };
 
     if (editIndex !== null) {
-      // Update existing dish
       const updatedDishes = [...dishes];
       updatedDishes[editIndex] = newDish;
       setDishes(updatedDishes);
       setEditIndex(null);
-      setScreen('dishes'); // 👈 Go back to dishes list after updating
+      setScreen('dishes'); 
     } else {
-      // Add new dish
       setDishes(prev => [...prev, newDish]);
     }
 
-    // Reset input fields
+    
     setName('');
     setDescription('');
     setPrice('');
@@ -51,7 +49,7 @@ export default function App() {
     setPrice(dish.price);
     setCategory(dish.category);
     setEditIndex(index);
-    setScreen('home'); // 👈 Return to home to edit
+    setScreen('home');
   };
 
   const handleDeleteDish = (index: number) => {
@@ -71,7 +69,7 @@ export default function App() {
   const filteredDishes =
     filter === 'All' ? dishes : dishes.filter(dish => dish.category === filter);
 
-  // ---------------- HOME SCREEN ----------------
+
   if (screen === 'home') {
     return (
       <ImageBackground
@@ -83,7 +81,7 @@ export default function App() {
           <Text style={styles.title}>Christoffel Menu Manager</Text>
           <Text style={styles.totalText}>Total Dishes: {dishes.length}</Text>
 
-          {/* Input Fields for Adding Dish */}
+          
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Dish Name:</Text>
             <TextInput
@@ -119,7 +117,7 @@ export default function App() {
             </Picker>
           </View>
 
-          {/* Add or Update Button */}
+          
           <Pressable
             onPress={handleAddOrUpdateDish}
             style={({ pressed }) => [
@@ -132,7 +130,7 @@ export default function App() {
             </Text>
           </Pressable>
 
-          {/* Navigate to Dishes Screen */}
+          
           <Pressable
             onPress={() => setScreen('dishes')}
             style={({ pressed }) => [
@@ -147,7 +145,7 @@ export default function App() {
     );
   }
 
-  // ---------------- DISHES SCREEN ----------------
+  
   return (
     <SafeAreaView style={styles.dishesContainer}>
       <ImageBackground
@@ -157,7 +155,7 @@ export default function App() {
       />
       <Text style={styles.title}>Stored Dishes</Text>
 
-      {/* Filter Dishes by Category */}
+      
       <View style={styles.filterContainer}>
         <Text style={styles.label}>Course:</Text>
         {['All', 'Starter', 'Main', 'Dessert'].map(type => (
@@ -182,13 +180,13 @@ export default function App() {
             </Text>
             <Text style={styles.dishText}>{dish.description}</Text>
 
-            {/* Edit and Delete Buttons */}
+            
             <View style={styles.actionContainer}>
               <Pressable
                 onPress={() => handleEditDish(index)}
                 style={[styles.actionButton, { backgroundColor: '#064709ff' }]}
               >
-                <Text style={styles.actionText}>✏️ Edit</Text>
+                <Text style={styles.actionText}>🖊️Edit</Text>
               </Pressable>
               <Pressable
                 onPress={() => handleDeleteDish(index)}
@@ -201,7 +199,7 @@ export default function App() {
         ))}
       </ScrollView>
 
-      {/* Back to Home Button */}
+      
       <Pressable
         onPress={() => setScreen('home')}
         style={[styles.button, { backgroundColor: '#0a4822', alignSelf: 'center' }]}
