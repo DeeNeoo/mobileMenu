@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: { fontSize: 28, fontWeight: 'bold', color: '#0a4822', textAlign: 'center' },
-  totalText: { color: '#108b14', fontWeight: 'bold', fontSize: 18, marginVertical: 20 },
+  totalText: { color: '#e6b113ff', fontWeight: 'bold', fontSize: 18, marginVertical: 20 },
   inputContainer: {
     backgroundColor: 'rgba(255,255,255,0.9)',
     borderRadius: 10,
