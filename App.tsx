@@ -146,6 +146,11 @@ export default function App() {
   // Dishes Screen
   return (
     <SafeAreaView style={styles.dishesContainer}>
+      <ImageBackground
+        source={require('./assets/background.png')} // Ensure you have a background image or replace this
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        resizeMode="cover"
+      />
       <Text style={styles.title}>Stored Dishes</Text>
 
       {/* Filter Dishes by Category */}
