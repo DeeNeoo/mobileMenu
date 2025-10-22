@@ -1,16 +1,9 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Pressable,
-  ImageBackground,
-  TextInput,
-  ScrollView,
-  Alert,
-} from 'react-native';
+import { View, Text, Pressable, TextInput, StyleSheet, ImageBackground, ScrollView, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+// Dish type for consistency
 type Dish = {
   name: string;
   description: string;
@@ -19,18 +12,18 @@ type Dish = {
 };
 
 export default function App() {
+  const [screen, setScreen] = useState<'home' | 'dishes'>('home');
+  const [dishes, setDishes] = useState<Dish[]>([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('Starter');
-  const [dishes, setDishes] = useState<Dish[]>([]);
+  const [filter, setFilter] = useState('All');
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
-  // Add or update dish
-  const handleAddOrUpdate = () => {
+  const handleAddOrUpdateDish = () => {
     if (!name || !description || !price) return;
-
-    const newDish: Dish = { name, description, price, category };
+    const newDish = { name, description, price, category };
 
     if (editIndex !== null) {
       const updatedDishes = [...dishes];
@@ -41,15 +34,14 @@ export default function App() {
       setDishes(prev => [...prev, newDish]);
     }
 
-    // Clear input fields
+    // Reset input fields
     setName('');
     setDescription('');
     setPrice('');
     setCategory('Starter');
   };
 
-  // Edit a dish
-  const handleEdit = (index: number) => {
+  const handleEditDish = (index: number) => {
     const dish = dishes[index];
     setName(dish.name);
     setDescription(dish.description);
@@ -58,169 +50,188 @@ export default function App() {
     setEditIndex(index);
   };
 
-  // Delete a dish
-  const handleDelete = (index: number) => {
-    Alert.alert(
-      'Delete Dish',
-      'Are you sure you want to delete this dish?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            setDishes(prev => prev.filter((_, i) => i !== index));
-
-            // Clear input fields and reset edit state
-            setName('');
-            setDescription('');
-            setPrice('');
-            setCategory('Starter');
-            setEditIndex(null);
-          },
+  const handleDeleteDish = (index: number) => {
+    Alert.alert('Delete Dish', 'Are you sure you want to delete this dish?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          setDishes(prev => prev.filter((_, i) => i !== index));
+          setEditIndex(null);  // Reset edit index
         },
-      ]
-    );
+      },
+    ]);
   };
 
-  return (
-    <ImageBackground
-      source={require('./assets/background.png')}
-      style={{ flex: 1 }}
-      resizeMode="cover"
-    >
-      <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.4)', padding: 16 }}>
-        <SafeAreaView style={{ flex: 1 }}>
-          <ScrollView>
-            {/* Header */}
-            <View style={{ alignItems: 'center', marginBottom: 20 }}>
-              <Text style={styles.title}>Christoffel Menu Manager</Text>
-            </View>
+  const filteredDishes =
+    filter === 'All' ? dishes : dishes.filter(dish => dish.category === filter);
 
-            {/* Input Fields */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Dish Name:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter dish name"
-                value={name}
-                onChangeText={setName}
-              />
+  // Home Screen
+  if (screen === 'home') {
+    return (
+      <ImageBackground
+        source={require('./assets/background.png')} // Ensure you have a background image or replace this
+        style={{ flex: 1 }}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          <Text style={styles.title}>Christoffel Menu Manager</Text>
+          <Text style={styles.totalText}>Total Dishes: {dishes.length}</Text>
 
-              <Text style={styles.label}>Description:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter description"
-                value={description}
-                onChangeText={setDescription}
-              />
-
-              <Text style={styles.label}>Price (R):</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter price"
-                value={price}
-                onChangeText={setPrice}
-                keyboardType="numeric"
-              />
-
-              <Text style={styles.label}>Category:</Text>
-              <View style={styles.categoryContainer}>
-                {['Starter', 'Main', 'Dessert'].map(cat => (
-                  <Pressable
-                    key={cat}
-                    onPress={() => setCategory(cat)}
-                    style={[
-                      styles.categoryButton,
-                      { backgroundColor: category === cat ? '#108b14' : '#ccc' },
-                    ]}
-                  >
-                    <Text
-                      style={{
-                        color: category === cat ? '#11e6b8' : '#000',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      {cat}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-
-            {/* Add/Update Button */}
-            <Pressable
-              onPress={handleAddOrUpdate}
-              style={({ pressed }) => [
-                styles.addButton,
-                { backgroundColor: pressed ? '#0c7011' : '#108b14' },
-              ]}
+          {/* Input Fields for Adding Dish */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Dish Name:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter dish name"
+              value={name}
+              onChangeText={setName}
+            />
+            <Text style={styles.label}>Description:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter description"
+              value={description}
+              onChangeText={setDescription}
+            />
+            <Text style={styles.label}>Price (R):</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter price"
+              value={price}
+              onChangeText={setPrice}
+              keyboardType="numeric"
+            />
+            <Text style={styles.label}>Category:</Text>
+            <Picker
+              selectedValue={category}
+              onValueChange={setCategory}
+              style={styles.picker}
             >
-              <Text style={styles.addButtonText}>
-                {editIndex !== null ? 'Update Item' : 'Add Item'}
-              </Text>
-            </Pressable>
+              <Picker.Item label="Starter" value="Starter" />
+              <Picker.Item label="Main" value="Main" />
+              <Picker.Item label="Dessert" value="Dessert" />
+            </Picker>
+          </View>
 
-            {/* Total and List */}
-            <View style={{ marginTop: 20 }}>
-              <Text style={styles.totalText}>Total Items: {dishes.length}</Text>
+          {/* Add or Update Button */}
+          <Pressable
+            onPress={handleAddOrUpdateDish}
+            style={({ pressed }) => [
+              styles.button,
+              { backgroundColor: pressed ? '#064709ff' : '#064709ff' },
+            ]}
+          >
+            <Text style={styles.buttonText}>
+              {editIndex !== null ? 'Update Dish' : 'Add Dish'}
+            </Text>
+          </Pressable>
 
-              {dishes.map((dish, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.dishItem,
-                    editIndex === index && { borderWidth: 2, borderColor: '#0a9396' },
-                  ]}
-                >
-                  <Text style={styles.dishText}>
-                    {dish.name} - {dish.category} - R{dish.price}
-                  </Text>
-                  <Text style={styles.dishText}>{dish.description}</Text>
+          {/* Navigate to Dishes Screen */}
+          <Pressable
+            onPress={() => setScreen('dishes')}
+            style={({ pressed }) => [
+              styles.button,
+              { backgroundColor: pressed ? '#064709ff' : '#064709ff' },
+            ]}
+          >
+            <Text style={styles.buttonText}>View Dishes</Text>
+          </Pressable>
+        </View>
+      </ImageBackground>
+    );
+  }
 
-                  <View style={styles.actionContainer}>
-                    <Pressable
-                      onPress={() => handleEdit(index)}
-                      style={[styles.actionButton, { backgroundColor: '#43d859ff' }]}
-                    >
-                      <Text style={styles.actionText}>Edit</Text>
-                    </Pressable>
+  // Dishes Screen
+  return (
+    <SafeAreaView style={styles.dishesContainer}>
+      <Text style={styles.title}>Stored Dishes</Text>
 
-                    <Pressable
-                      onPress={() => handleDelete(index)}
-                      style={[styles.actionButton, { backgroundColor: '#d9534f' }]}
-                    >
-                      <Text style={styles.actionText}>🗑️Delete</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </ScrollView>
-        </SafeAreaView>
+      {/* Filter Dishes by Category */}
+      <View style={styles.filterContainer}>
+        <Text style={styles.label}>Course:</Text>
+        <Pressable
+          onPress={() => setFilter('All')}
+          style={[styles.filterButton, filter === 'All' && styles.selectedFilterButton]}
+        >
+          <Text style={styles.filterText}>All</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setFilter('Starter')}
+          style={[styles.filterButton, filter === 'Starter' && styles.selectedFilterButton]}
+        >
+          <Text style={styles.filterText}>Starter</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setFilter('Main')}
+          style={[styles.filterButton, filter === 'Main' && styles.selectedFilterButton]}
+        >
+          <Text style={styles.filterText}>Main</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setFilter('Dessert')}
+          style={[styles.filterButton, filter === 'Dessert' && styles.selectedFilterButton]}
+        >
+          <Text style={styles.filterText}>Dessert</Text>
+        </Pressable>
       </View>
-    </ImageBackground>
+
+      <ScrollView>
+        {filteredDishes.map((dish, index) => (
+          <View key={index} style={styles.dishItem}>
+            <Text style={styles.dishText}>
+              {dish.name} - {dish.category} - R{dish.price}
+            </Text>
+            <Text style={styles.dishText}>{dish.description}</Text>
+
+            {/* Edit and Delete Buttons */}
+            <View style={styles.actionContainer}>
+              <Pressable
+                onPress={() => handleEditDish(index)}
+                style={[styles.actionButton, { backgroundColor: '#064709ff' }]}
+              >
+                <Text style={styles.actionText}>Edit</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => handleDeleteDish(index)}
+                style={[styles.actionButton, { backgroundColor: '#d9534f' }]}
+              >
+                <Text style={styles.actionText}>🗑️ Delete</Text>
+              </Pressable>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* Back to Home Button */}
+      <Pressable
+        onPress={() => setScreen('home')}
+        style={[styles.button, { backgroundColor: '#0a4822' }]}
+      >
+        <Text style={styles.buttonText}>Back to Home</Text>
+      </Pressable>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#0a4822ff',
-    textAlign: 'center',
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#108b14', textAlign: 'center' },
+  totalText: { color: '#108b14', fontWeight: 'bold', fontSize: 18, marginVertical: 20 },
   inputContainer: {
     backgroundColor: 'rgba(255,255,255,0.9)',
     borderRadius: 10,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 20,
+    width: '80%',
   },
-  label: {
-    color: '#11d63cff',
-    marginBottom: 6,
-    fontWeight: 'bold',
-  },
+  label: { color: '#11d63c', marginBottom: 6, fontWeight: 'bold' },
   input: {
     backgroundColor: '#fff',
     borderRadius: 6,
@@ -229,55 +240,48 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  categoryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 12,
-  },
-  categoryButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  addButton: {
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  addButtonText: {
-    color: '#11e6b8',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  totalText: {
-    color: '#11e6b8',
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 12,
+  picker: { height: 50, width: '100%' },
+  button: { paddingVertical: 14, borderRadius: 8, alignItems: 'center', marginBottom: 20, width: '80%' },
+  buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  dishesContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 20,
   },
   dishItem: {
     backgroundColor: 'rgba(255,255,255,0.9)',
     padding: 12,
     borderRadius: 8,
-    marginBottom: 10,
+    marginBottom: 15,
   },
-  dishText: {
-    color: '#11e6b8',
-  },
+  dishText: { fontSize: 16, color: '#333' },
   actionContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 8,
+    justifyContent: 'space-between',
+    marginTop: 10,
   },
   actionButton: {
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 6,
-    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  actionText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  actionText: { color: '#fff', fontWeight: 'bold' },
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+    alignItems: 'center',
   },
+  filterButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    backgroundColor: '#f0f0f0',
+  },
+  selectedFilterButton: {
+    backgroundColor: '#108b14',
+  },
+  filterText: { color: '#333' },
 });
