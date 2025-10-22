@@ -58,7 +58,7 @@ export default function App() {
         style: 'destructive',
         onPress: () => {
           setDishes(prev => prev.filter((_, i) => i !== index));
-          setEditIndex(null);  // Reset edit index
+          setEditIndex(null);  
         },
       },
     ]);
@@ -71,7 +71,7 @@ export default function App() {
   if (screen === 'home') {
     return (
       <ImageBackground
-        source={require('./assets/background.png')} // Ensure you have a background image or replace this
+        source={require('./assets/background.png')} 
         style={{ flex: 1 }}
         resizeMode="cover"
       >
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#108b14', textAlign: 'center' },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#0a4822', textAlign: 'center' },
   totalText: { color: '#108b14', fontWeight: 'bold', fontSize: 18, marginVertical: 20 },
   inputContainer: {
     backgroundColor: 'rgba(255,255,255,0.9)',
