@@ -26,11 +26,14 @@ export default function App() {
     const newDish = { name, description, price, category };
 
     if (editIndex !== null) {
+      // Update existing dish
       const updatedDishes = [...dishes];
       updatedDishes[editIndex] = newDish;
       setDishes(updatedDishes);
       setEditIndex(null);
+      setScreen('dishes'); // 👈 Go back to dishes list after updating
     } else {
+      // Add new dish
       setDishes(prev => [...prev, newDish]);
     }
 
@@ -48,6 +51,7 @@ export default function App() {
     setPrice(dish.price);
     setCategory(dish.category);
     setEditIndex(index);
+    setScreen('home'); // 👈 Return to home to edit
   };
 
   const handleDeleteDish = (index: number) => {
@@ -58,7 +62,7 @@ export default function App() {
         style: 'destructive',
         onPress: () => {
           setDishes(prev => prev.filter((_, i) => i !== index));
-          setEditIndex(null);  
+          setEditIndex(null);
         },
       },
     ]);
@@ -67,11 +71,11 @@ export default function App() {
   const filteredDishes =
     filter === 'All' ? dishes : dishes.filter(dish => dish.category === filter);
 
-  // Home Screen
+  // ---------------- HOME SCREEN ----------------
   if (screen === 'home') {
     return (
       <ImageBackground
-        source={require('./assets/background.png')} 
+        source={require('./assets/background.png')}
         style={{ flex: 1 }}
         resizeMode="cover"
       >
@@ -120,7 +124,7 @@ export default function App() {
             onPress={handleAddOrUpdateDish}
             style={({ pressed }) => [
               styles.button,
-              { backgroundColor: pressed ? '#064709ff' : '#064709ff' },
+              { backgroundColor: pressed ? '#055c26' : '#064709ff' },
             ]}
           >
             <Text style={styles.buttonText}>
@@ -133,7 +137,7 @@ export default function App() {
             onPress={() => setScreen('dishes')}
             style={({ pressed }) => [
               styles.button,
-              { backgroundColor: pressed ? '#064709ff' : '#064709ff' },
+              { backgroundColor: pressed ? '#055c26' : '#064709ff' },
             ]}
           >
             <Text style={styles.buttonText}>View Dishes</Text>
@@ -143,11 +147,11 @@ export default function App() {
     );
   }
 
-  // Dishes Screen
+  // ---------------- DISHES SCREEN ----------------
   return (
     <SafeAreaView style={styles.dishesContainer}>
       <ImageBackground
-        source={require('./assets/background.png')} // Ensure you have a background image or replace this
+        source={require('./assets/background.png')}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         resizeMode="cover"
       />
@@ -156,30 +160,18 @@ export default function App() {
       {/* Filter Dishes by Category */}
       <View style={styles.filterContainer}>
         <Text style={styles.label}>Course:</Text>
-        <Pressable
-          onPress={() => setFilter('All')}
-          style={[styles.filterButton, filter === 'All' && styles.selectedFilterButton]}
-        >
-          <Text style={styles.filterText}>All</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setFilter('Starter')}
-          style={[styles.filterButton, filter === 'Starter' && styles.selectedFilterButton]}
-        >
-          <Text style={styles.filterText}>Starter</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setFilter('Main')}
-          style={[styles.filterButton, filter === 'Main' && styles.selectedFilterButton]}
-        >
-          <Text style={styles.filterText}>Main</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setFilter('Dessert')}
-          style={[styles.filterButton, filter === 'Dessert' && styles.selectedFilterButton]}
-        >
-          <Text style={styles.filterText}>Dessert</Text>
-        </Pressable>
+        {['All', 'Starter', 'Main', 'Dessert'].map(type => (
+          <Pressable
+            key={type}
+            onPress={() => setFilter(type)}
+            style={[
+              styles.filterButton,
+              filter === type && styles.selectedFilterButton,
+            ]}
+          >
+            <Text style={styles.filterText}>{type}</Text>
+          </Pressable>
+        ))}
       </View>
 
       <ScrollView>
@@ -196,7 +188,7 @@ export default function App() {
                 onPress={() => handleEditDish(index)}
                 style={[styles.actionButton, { backgroundColor: '#064709ff' }]}
               >
-                <Text style={styles.actionText}>Edit</Text>
+                <Text style={styles.actionText}>✏️ Edit</Text>
               </Pressable>
               <Pressable
                 onPress={() => handleDeleteDish(index)}
@@ -212,7 +204,7 @@ export default function App() {
       {/* Back to Home Button */}
       <Pressable
         onPress={() => setScreen('home')}
-        style={[styles.button, { backgroundColor: '#0a4822' }]}
+        style={[styles.button, { backgroundColor: '#0a4822', alignSelf: 'center' }]}
       >
         <Text style={styles.buttonText}>Back to Home</Text>
       </Pressable>
@@ -246,7 +238,13 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
   },
   picker: { height: 50, width: '100%' },
-  button: { paddingVertical: 14, borderRadius: 8, alignItems: 'center', marginBottom: 20, width: '80%' },
+  button: {
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
+    width: '80%',
+  },
   buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   dishesContainer: {
     flex: 1,
