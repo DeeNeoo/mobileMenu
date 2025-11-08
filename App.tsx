@@ -3,8 +3,8 @@ import { View, Text, Pressable, TextInput, StyleSheet, ImageBackground, ScrollVi
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Dish type for consistency
 type Dish = {
+  id: string;
   name: string;
   description: string;
   price: string;
@@ -12,6 +12,7 @@ type Dish = {
 };
 
 export default function App() {
+  // state variables to manage app data and UI
   const [screen, setScreen] = useState<'home' | 'dishes'>('home');
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [name, setName] = useState('');
@@ -22,25 +23,63 @@ export default function App() {
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
   const handleAddOrUpdateDish = () => {
-    if (!name || !description || !price) return;
-    const newDish = { name, description, price, category };
+    const trimmedName = name.trim();
+    const trimmedDesc = description.trim();
+    const priceValue = parseFloat(price);
+
+    // makes sure all fields are filled
+    if (!trimmedName || !trimmedDesc || !price) {
+      Alert.alert("Error", "All fields are required.");
+      return;
+    }
+
+    //it checks if the price is above zero so user cant add free or negative priced dishes
+    if (priceValue <= 0) {
+      Alert.alert("Error", "Price must be greater than zero.");
+      return;
+    }
+
+    //this checks for duplicate dish names in same category
+    const exists = dishes.some(
+      dish =>
+        dish.name.toLowerCase() === trimmedName.toLowerCase() &&
+        dish.category === category &&
+        editIndex === null
+    );
+
+    if (exists) {
+      Alert.alert("Duplicate Dish", "This dish and course already exist.");
+      return;
+    }
+
+
+    const newDish = {
+      id: Date.now().toString(),
+      name: trimmedName,
+      description: trimmedDesc,
+      price,
+      category,
+    };
+
 
     if (editIndex !== null) {
       const updatedDishes = [...dishes];
       updatedDishes[editIndex] = newDish;
       setDishes(updatedDishes);
+      Alert.alert("Success", "Dish updated successfully!");
       setEditIndex(null);
-      setScreen('dishes'); 
     } else {
       setDishes(prev => [...prev, newDish]);
+      Alert.alert("Success", "Dish added successfully!");
     }
 
-    
+    //it clears input fileds after adding/updating
     setName('');
     setDescription('');
     setPrice('');
     setCategory('Starter');
-  };
+    setScreen('dishes'); 
+  }; 
 
   const handleEditDish = (index: number) => {
     const dish = dishes[index];
@@ -53,6 +92,7 @@ export default function App() {
   };
 
   const handleDeleteDish = (index: number) => {
+    // it confirms if user really wants to delete
     Alert.alert('Delete Dish', 'Are you sure you want to delete this dish?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -66,223 +106,7 @@ export default function App() {
     ]);
   };
 
+  // this filters dishes by course/category
   const filteredDishes =
     filter === 'All' ? dishes : dishes.filter(dish => dish.category === filter);
-
-
-  if (screen === 'home') {
-    return (
-      <ImageBackground
-        source={require('./assets/background.png')}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <View style={styles.overlay}>
-          <Text style={styles.title}>Christoffel Menu Manager</Text>
-          <Text style={styles.totalText}>Total Dishes: {dishes.length}</Text>
-
-          
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Dish Name:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter dish name"
-              value={name}
-              onChangeText={setName}
-            />
-            <Text style={styles.label}>Description:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter description"
-              value={description}
-              onChangeText={setDescription}
-            />
-            <Text style={styles.label}>Price (R):</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter price"
-              value={price}
-              onChangeText={setPrice}
-              keyboardType="numeric"
-            />
-            <Text style={styles.label}>Category:</Text>
-            <Picker
-              selectedValue={category}
-              onValueChange={setCategory}
-              style={styles.picker}
-            >
-              <Picker.Item label="Starter" value="Starter" />
-              <Picker.Item label="Main" value="Main" />
-              <Picker.Item label="Dessert" value="Dessert" />
-            </Picker>
-          </View>
-
-          
-          <Pressable
-            onPress={handleAddOrUpdateDish}
-            style={({ pressed }) => [
-              styles.button,
-              { backgroundColor: pressed ? '#055c26' : '#064709ff' },
-            ]}
-          >
-            <Text style={styles.buttonText}>
-              {editIndex !== null ? 'Update Dish' : 'Add Dish'}
-            </Text>
-          </Pressable>
-
-          
-          <Pressable
-            onPress={() => setScreen('dishes')}
-            style={({ pressed }) => [
-              styles.button,
-              { backgroundColor: pressed ? '#055c26' : '#064709ff' },
-            ]}
-          >
-            <Text style={styles.buttonText}>View Dishes</Text>
-          </Pressable>
-        </View>
-      </ImageBackground>
-    );
-  }
-
-  
-  return (
-    <SafeAreaView style={styles.dishesContainer}>
-      <ImageBackground
-        source={require('./assets/background.png')}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-        resizeMode="cover"
-      />
-      <Text style={styles.title}>Stored Dishes</Text>
-
-      
-      <View style={styles.filterContainer}>
-        <Text style={styles.label}>Course:</Text>
-        {['All', 'Starter', 'Main', 'Dessert'].map(type => (
-          <Pressable
-            key={type}
-            onPress={() => setFilter(type)}
-            style={[
-              styles.filterButton,
-              filter === type && styles.selectedFilterButton,
-            ]}
-          >
-            <Text style={styles.filterText}>{type}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <ScrollView>
-        {filteredDishes.map((dish, index) => (
-          <View key={index} style={styles.dishItem}>
-            <Text style={styles.dishText}>
-              {dish.name} - {dish.category} - R{dish.price}
-            </Text>
-            <Text style={styles.dishText}>{dish.description}</Text>
-
-            
-            <View style={styles.actionContainer}>
-              <Pressable
-                onPress={() => handleEditDish(index)}
-                style={[styles.actionButton, { backgroundColor: '#064709ff' }]}
-              >
-                <Text style={styles.actionText}>🖊️Edit</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => handleDeleteDish(index)}
-                style={[styles.actionButton, { backgroundColor: '#d9534f' }]}
-              >
-                <Text style={styles.actionText}>🗑️ Delete</Text>
-              </Pressable>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-
-      
-      <Pressable
-        onPress={() => setScreen('home')}
-        style={[styles.button, { backgroundColor: '#0a4822', alignSelf: 'center' }]}
-      >
-        <Text style={styles.buttonText}>Back to Home</Text>
-      </Pressable>
-    </SafeAreaView>
-  );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#0a4822', textAlign: 'center' },
-  totalText: { color: '#e6b113ff', fontWeight: 'bold', fontSize: 18, marginVertical: 20 },
-  inputContainer: {
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 20,
-    width: '80%',
-  },
-  label: { color: '#11d63c', marginBottom: 6, fontWeight: 'bold' },
-  input: {
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    padding: 10,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#ccc',
-  },
-  picker: { height: 50, width: '100%' },
-  button: {
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 20,
-    width: '80%',
-  },
-  buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  dishesContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-  },
-  dishItem: {
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
-  dishText: { fontSize: 16, color: '#333' },
-  actionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  actionButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  actionText: { color: '#fff', fontWeight: 'bold' },
-  filterContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-    alignItems: 'center',
-  },
-  filterButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    backgroundColor: '#f0f0f0',
-  },
-  selectedFilterButton: {
-    backgroundColor: '#108b14',
-  },
-  filterText: { color: '#333' },
-});
