@@ -3,7 +3,7 @@ import { View, Text, Pressable, TextInput, StyleSheet, ScrollView, Alert, FlatLi
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// --- Types & Constants ---
+
 type Dish = {
   id: string;
   name: string;
@@ -29,7 +29,7 @@ const COLORS = {
   OVERLAY: 'rgba(255, 255, 255, 0.7)', 
 };
 
-// --- Helper Functions ---
+
 const calculateAveragePrice = (dishes: Dish[]) => {
   const categoryPrices: Record<string, number[]> = {
     Starter: [],
@@ -60,7 +60,7 @@ const calculateAveragePrice = (dishes: Dish[]) => {
   return averages;
 };
 
-// --- Shared Components ---
+
 const DishCard: React.FC<{
   dish: Dish;
   index: number;
@@ -137,7 +137,7 @@ const DishForm: React.FC<{
   </ScrollView>
 );
 
-// --- Bottom Tab Bar ---
+// bottom tab navigation
 const BottomTabs: React.FC<{ setScreen: (screen: ScreenName) => void }> = ({ setScreen }) => (
   <View style={styles.tabBar}>
     <Pressable onPress={() => setScreen('menu')} style={styles.tabButton}>
@@ -152,7 +152,7 @@ const BottomTabs: React.FC<{ setScreen: (screen: ScreenName) => void }> = ({ set
   </View>
 );
 
-// --- Screens ---
+// menu screen
 const MenuScreen: React.FC<{ dishes: Dish[]; setScreen: (screen: ScreenName) => void }> = ({ dishes, setScreen }) => {
   const averages = useMemo(() => calculateAveragePrice(dishes), [dishes]);
 
@@ -366,7 +366,7 @@ const GuestScreen: React.FC<{ dishes: Dish[]; setScreen: (screen: ScreenName) =>
   );
 };
 
-// --- Main App ---
+
 export default function App() {
   const [screen, setScreen] = useState<ScreenName>('menu');
   const [dishes, setDishes] = useState<Dish[]>([]);
@@ -379,7 +379,7 @@ export default function App() {
   }
 }
 
-// --- Styles ---
+
 const styles = StyleSheet.create({
   safeArea: { flex: 1, alignItems: "center", paddingTop: 10 },
   contentOverlay: { flex: 1, width: '100%', backgroundColor: COLORS.OVERLAY, alignItems: 'center', paddingBottom: 80 },
@@ -402,8 +402,36 @@ const styles = StyleSheet.create({
   emptyText: { textAlign: 'center', color: COLORS.TEXT_DARK, fontStyle: 'italic', marginTop: 20, fontSize: 16 },
   averageContainer: { backgroundColor: COLORS.BACKGROUND_LIGHT, padding: 15, borderRadius: 10, marginBottom: 20, width: '90%', alignSelf: 'center', borderLeftWidth: 5, borderLeftColor: COLORS.PRIMARY_GREEN },
   averageText: { fontSize: 16, color: COLORS.TEXT_DARK, marginTop: 6, marginBottom: 6 },
-  tabBar: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', justifyContent: 'space-around', backgroundColor: COLORS.BACKGROUND_LIGHT, borderTopWidth: 1, borderTopColor: COLORS.BORDER_LIGHT, paddingVertical: 8 },
-  tabButton: { flex: 1, alignItems: 'center', paddingVertical: 10 },
-  tabText: { color: COLORS.TEXT_DARK, fontWeight: '600' },
-  formContainer: { paddingTop: 10, paddingBottom: 40, alignItems: 'center', width: '100%' },
+
+  tabBar: {
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  bottom: 0,
+  flexDirection: 'row',
+  justifyContent: 'space-evenly',
+  paddingVertical: 10,
+  backgroundColor: 'transparent',
+},
+
+tabButton: {
+  backgroundColor: COLORS.PRIMARY_GREEN,
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  borderRadius: 8,
+  marginHorizontal: 5,
+},
+
+tabText: {
+  color: "white",
+  fontWeight: "bold",
+  fontSize: 14,
+},
+
+formContainer: { 
+  paddingTop: 10, 
+  paddingBottom: 40, 
+  alignItems: 'center', 
+  width: '100%' 
+},
 });
