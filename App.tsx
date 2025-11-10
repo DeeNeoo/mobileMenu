@@ -1,383 +1,313 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, Pressable, TextInput, StyleSheet, ScrollView, Alert, FlatList, ImageBackground } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useMemo, useCallback } from 'react';
+import { View, Text, TouchableOpacity, Alert, FlatList, TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker'; 
 import { styles } from './styles'; 
 
-
-
-type Dish = {
-  id: string;
-  name: string;
-  description: string;
-  price: string;
-  category: string;
-};
-
-type ScreenName = 'menu' | 'manage' | 'guest';
-
-const CATEGORIES = ['Starter', 'Main', 'Dessert'];
-
-const BACKGROUND_IMAGE_SOURCE = require('./assets/background.png');
-
-const COLORS = {
-  PRIMARY_GREEN: '#2e7d32', 
-  ACCENT_GREEN: '#4caf50',   
-  BACKGROUND_LIGHT: '#f1f8e9', 
-  SUCCESS_GREEN: '#388e3c',  
-  ERROR_RED: '#b00000',      
-  TEXT_DARK: '#333333',
-  BORDER_LIGHT: '#ccc',
-  OVERLAY: 'rgba(255, 255, 255, 0.7)', 
-};
-
-
-const calculateAveragePrice = (dishes: Dish[]) => {
-  const categoryPrices: Record<string, number[]> = {
-    Starter: [],
-    Main: [],
-    Dessert: [],
-  };
-
-  dishes.forEach(dish => {
-    const priceValue = parseFloat(dish.price);
-    if (!isNaN(priceValue) && dish.category in categoryPrices) {
-      categoryPrices[dish.category].push(priceValue);
-    }
-  });
-
-  const averages: Record<string, string> = {};
-
-  for (const category of CATEGORIES) {
-    const prices = categoryPrices[category];
-    if (prices.length > 0) {
-      const total = prices.reduce((sum, price) => sum + price, 0);
-      const average = total / prices.length;
-      averages[category] = average.toFixed(2); 
-    } else {
-      averages[category] = '(null)';
-    }
-  }
-
-  return averages;
-};
-
-
-const DishCard: React.FC<{
-  dish: Dish;
-  index: number;
-  showManagementButtons: boolean;
-  onEdit: (index: number) => void;
-  onDelete: (index: number) => void;
-}> = ({ dish, index, showManagementButtons, onEdit, onDelete }) => (
-  <View key={dish.id} style={styles.card}>
-    <Text style={styles.cardTitle}>{dish.name} - R{dish.price}</Text>
-    <Text>{dish.description}</Text>
-    <Text style={styles.cardCategory}>Course: {dish.category}</Text>
-
-    {showManagementButtons && (
-      <View style={styles.cardButtonRow}>
-        <Pressable style={styles.smallBtn} onPress={() => onEdit(index)}>
-          <Text style={styles.smallBtnText}>Edit</Text>
-        </Pressable>
-        <Pressable style={[styles.smallBtn, { backgroundColor: COLORS.ERROR_RED }]} onPress={() => onDelete(index)}>
-          <Text style={styles.smallBtnText}>Delete</Text>
-        </Pressable>
-      </View>
-    )}
-  </View>
-);
-
-const DishForm: React.FC<{
-  name: string; setName: (text: string) => void;
-  description: string; setDescription: (text: string) => void;
-  price: string; setPrice: (text: string) => void;
-  category: string; setCategory: (value: string) => void;
-  handleAddOrUpdateDish: () => void;
-  editIndex: number | null;
-  errorMessage: string;
-  successMessage: string;
-}> = ({
-  name, setName, description, setDescription, price, setPrice, category, setCategory,
-  handleAddOrUpdateDish, editIndex, errorMessage, successMessage
-}) => (
-  <ScrollView style={{ width: "100%" }} contentContainerStyle={styles.formContainer}>
-    <View style={styles.contentOverlay}> 
-      <Text style={styles.heading}>{editIndex !== null ? "Update Dish" : "Add New Dish"}</Text>
-
-      <TextInput style={styles.input} placeholder="Dish Name" value={name} onChangeText={setName} />
-
-      <TextInput
-        style={[styles.input, { height: 80 }]}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Price"   
-        value={price}
-        keyboardType="numeric"
-        onChangeText={setPrice}
-      />
-
-      <Picker selectedValue={category} onValueChange={(itemValue) => setCategory(itemValue as string)} style={styles.picker}>
-        {CATEGORIES.map(cat => (
-          <Picker.Item key={cat} label={cat} value={cat} />
-        ))}
-      </Picker>
-
-      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
-      {successMessage ? <Text style={styles.success}>{successMessage}</Text> : null}
-
-      <Pressable style={styles.button} onPress={handleAddOrUpdateDish}>
-        <Text style={styles.buttonText}>{editIndex !== null ? "Update Dish" : "Add Dish"}</Text>
-      </Pressable>
-    </View>
-  </ScrollView>
-);
-
-// bottom tab navigation
-const BottomTabs: React.FC<{ setScreen: (screen: ScreenName) => void }> = ({ setScreen }) => (
-  <View style={styles.tabBar}>
-    <Pressable onPress={() => setScreen('menu')} style={styles.tabButton}>
-      <Text style={styles.tabText}>Menu</Text>
-    </Pressable>
-   <Pressable onPress={() => {
-       setScreen('manage');
-        }} style={styles.tabButton}>
-    <Text style={styles.tabText}>Manage</Text>
-  </Pressable>
-    <Pressable onPress={() => setScreen('guest')} style={styles.tabButton}>
-      <Text style={styles.tabText}>Guest View</Text>
-    </Pressable>
-  </View>
-);
-
-// menu screen
-const MenuScreen: React.FC<{ dishes: Dish[]; setScreen: (screen: ScreenName) => void }> = ({ dishes, setScreen }) => {
-  const averages = useMemo(() => calculateAveragePrice(dishes), [dishes]);
-
-  return (
-    <ImageBackground source={BACKGROUND_IMAGE_SOURCE} style={{ flex: 1 }} resizeMode="cover">
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.contentOverlay}>
-          <Text style={styles.heading}>Christoffel's Menu</Text>
-
-          <View style={styles.averageContainer}>
-            <Text style={styles.subHeading}>Average Price per Course</Text>
-            {CATEGORIES.map(cat => (
-              <Text key={cat} style={styles.averageText}>
-                {cat}: R{averages[cat] || '0.00'}
-              </Text>
-            ))}
-          </View>
-
-          <FlatList
-            data={dishes}
-            keyExtractor={item => item.id}
-            style={{ width: "100%" }}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
-            renderItem={({ item, index }) => (
-              <DishCard
-                dish={item}
-                index={index}
-                showManagementButtons={false}
-                onEdit={() => {}} 
-                onDelete={() => {}} 
-              />
-            )}
-            ListEmptyComponent={() => <Text style={styles.emptyText}>No dishes on the menu yet. Please add them in the 'Manage Menu' screen.</Text>}
-          />
-
-          <BottomTabs setScreen={setScreen} />
-        </View>
-      </SafeAreaView>
-    </ImageBackground>
-  );
-};
-
-const ManageScreen: React.FC<{ dishes: Dish[]; setDishes: React.Dispatch<React.SetStateAction<Dish[]>>; setScreen: (screen: ScreenName) => void }> = ({ dishes, setDishes, setScreen }) => {
-  const [isAdding, setIsAdding] = useState(false);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('Starter');
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-
-  const handleClearForm = () => {
-    setName(''); setDescription(''); setPrice(''); setCategory('Starter'); setEditIndex(null);
-    setErrorMessage(''); setSuccessMessage('');
-  };
-
-  const handleAddOrUpdateDish = () => {
-    const trimmedName = name.trim();
-    const trimmedDesc = description.trim();
-    const priceValue = parseFloat(price);
-
-    setErrorMessage(''); setSuccessMessage('');
-
-    if (!trimmedName || !trimmedDesc || !price) {
-      setErrorMessage("Please fill in all fields."); return;
-    }
-    if (isNaN(priceValue) || priceValue <= 0) {
-      setErrorMessage("Price must be a number greater than zero."); return;
-    }
-
-    const exists = dishes.some((dish, index) =>
-      dish.name.toLowerCase() === trimmedName.toLowerCase() &&
-      dish.category === category &&
-      index !== editIndex
-    );
-
-    if (exists) {
-      setErrorMessage("This dish already exists in this course."); return;
-    }
-
-    const newDish: Dish = {
-      id: editIndex !== null ? dishes[editIndex].id : Date.now().toString(),
-      name: trimmedName,
-      description: trimmedDesc,
-      price: priceValue.toFixed(2),
-      category,
-    };
-
-    if (editIndex !== null) {
-      const updatedDishes = [...dishes]; updatedDishes[editIndex] = newDish; setDishes(updatedDishes);
-      setSuccessMessage("Dish updated!");
-    } else {
-      setDishes(prev => [...prev, newDish]);
-      setSuccessMessage("Dish added!");
-    }
-
-    handleClearForm(); setIsAdding(false);
-  };
-
-  const handleEditDish = (index: number) => {
-    const dish = dishes[index];
-    setName(dish.name); setDescription(dish.description); setPrice(dish.price); setCategory(dish.category);
-    setEditIndex(index); setSuccessMessage(''); setErrorMessage(''); setIsAdding(true);
-  };
-
-  const handleDeleteDish = (index: number) => {
-    Alert.alert('Delete Dish', 'Are you sure you want to delete this dish?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => {
-        setDishes(prev => prev.filter((_, i) => i !== index)); handleClearForm();
-        Alert.alert("Deleted", "Dish removed successfully.");
-      }}
-    ]);
-  };
-
-  if (isAdding) {
-    return (
-      <ImageBackground source={BACKGROUND_IMAGE_SOURCE} style={{ flex: 1 }} resizeMode="cover">
-        <SafeAreaView style={styles.safeArea}>
-          <DishForm
-            name={name} setName={setName}
-            description={description} setDescription={setDescription}
-            price={price} setPrice={setPrice}
-            category={category} setCategory={setCategory}
-            handleAddOrUpdateDish={handleAddOrUpdateDish}
-            editIndex={editIndex}
-            errorMessage={errorMessage}
-            successMessage={successMessage}
-          />
-          
-        </SafeAreaView>
-      </ImageBackground>
-    );
-  }
-
-  return (
-    <ImageBackground source={BACKGROUND_IMAGE_SOURCE} style={{ flex: 1 }} resizeMode="cover">
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.contentOverlay}>
-          <Text style={styles.heading}>Manage Menu Items</Text>
-
-          <FlatList
-            data={dishes}
-            keyExtractor={item => item.id}
-            style={{ width: "100%" }}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
-            renderItem={({ item, index }) => (
-              <DishCard
-                dish={item}
-                index={index}
-                showManagementButtons={true}
-                onEdit={handleEditDish}
-                onDelete={handleDeleteDish}
-              />
-            )}
-            ListEmptyComponent={() => <Text style={styles.emptyText}>No items to manage. Add one now!</Text>}
-          />
-
-          <Pressable style={styles.button} onPress={() => setIsAdding(true)}>
-            <Text style={styles.buttonText}>Add New Dish</Text>
-          </Pressable>
-          <BottomTabs setScreen={setScreen} />
-        </View>
-      </SafeAreaView>
-    </ImageBackground>
-  );
-};
-
-const GuestScreen: React.FC<{ dishes: Dish[]; setScreen: (screen: ScreenName) => void }> = ({ dishes, setScreen }) => {
-  const [filter, setFilter] = useState('All');
-  const filteredDishes = useMemo(() => filter === 'All' ? dishes : dishes.filter(dish => dish.category === filter), [dishes, filter]);
-
-  return (
-    <ImageBackground source={BACKGROUND_IMAGE_SOURCE} style={{ flex: 1 }} resizeMode="cover">
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.contentOverlay}>
-          <Text style={styles.heading}>Guest Menu View</Text>
-
-          <Picker selectedValue={filter} onValueChange={(itemValue) => setFilter(itemValue as string)} style={styles.picker}>
-            <Picker.Item label="All Courses" value="All" />
-            {CATEGORIES.map(cat => (
-              <Picker.Item key={cat} label={cat} value={cat} />
-            ))}
-          </Picker>
-
-          <FlatList
-            data={filteredDishes}
-            keyExtractor={item => item.id}
-            style={{ width: "100%" }}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
-            renderItem={({ item, index }) => (
-              <DishCard
-                dish={item}
-                index={index}
-                showManagementButtons={false}
-                onEdit={() => {}}
-                onDelete={() => {}}
-              />
-            )}
-            ListEmptyComponent={() => <Text style={styles.emptyText}>No dishes found for this filter.</Text>}
-          />
-
-          <BottomTabs setScreen={setScreen} />
-        </View>
-      </SafeAreaView>
-    </ImageBackground>
-  );
-};
-
-
-export default function App() {
-  const [screen, setScreen] = useState<ScreenName>('menu');
-  const [dishes, setDishes] = useState<Dish[]>([]);
-
-  switch (screen) {
-    case 'menu': return <MenuScreen dishes={dishes} setScreen={setScreen} />;
-    case 'manage': return <ManageScreen dishes={dishes} setDishes={setDishes} setScreen={setScreen} />;
-    case 'guest': return <GuestScreen dishes={dishes} setScreen={setScreen} />;
-    default: return <MenuScreen dishes={dishes} setScreen={setScreen} />;
-  }
+// --- DATA STRUCTURE ---
+interface MenuItem {
+    id: string;
+    name: string;
+    course: string;
+    price: number;
+    description: string;
 }
 
+// Global Course Definitions
+const COURSES = ['Main', 'Starter', 'Dessert']; 
+// Static filter options for the Guest screen
+const GUEST_FILTER_COURSES = ['All', ...COURSES];
 
+// Initial data adjusted to the new courses (Rands)
+const INITIAL_MENU_ITEMS: MenuItem[] = [
+    { id: '1', name: 'Lasagna', course: 'Main', price: 165.00, description: 'Pasta sheets with mince topped with mozarella cheese.' },
+    { id: '2', name: 'Prawns cocktail', course: 'Starter', price: 120.00, description: 'Deep fried prawns in a cup.' },
+    { id: '3', name: 'Tiramisu', course: 'Dessert', price: 150, description: 'A slice of Tiramisu dessert' },
+    
+];
+
+// --- REFACTORED LOGIC FUNCTION (Average Price) ---
+const calculateAveragePrices = (items: MenuItem[]): Record<string, string> => {
+    const courseStats: Record<string, { total: number, count: number }> = {};
+    items.forEach(item => {
+        const course = item.course;
+        if (!courseStats[course]) {
+            courseStats[course] = { total: 0, count: 0 };
+        }
+        courseStats[course].total += item.price;
+        courseStats[course].count += 1;
+    });
+
+    const averages: Record<string, string> = {};
+    for (const course in courseStats) {
+        const avg = courseStats[course].total / courseStats[course].count;
+        averages[course] = avg.toFixed(2);
+    }
+    return averages;
+};
+
+// --- REUSABLE COMPONENT: Menu List (UPDATED) ---
+interface MenuListProps {
+    items: MenuItem[];
+    showRemove?: boolean;
+    onRemoveItem?: (id: string) => void;
+}
+
+const MenuList: React.FC<MenuListProps> = ({ items, showRemove = false, onRemoveItem }) => (
+    <FlatList
+        data={items}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+            <View style={styles.itemContainer}>
+                <View style={styles.itemContent}>
+                    {/* UPDATED LINE: Removed (item.course) from display */}
+                    <Text style={styles.itemTitle}>{item.name} : R{item.price.toFixed(2)}</Text>
+                    {/* Display Description */}
+                    <Text style={styles.itemDescription}>{item.description}</Text>
+                </View>
+                {showRemove && onRemoveItem && (
+                    <TouchableOpacity 
+                        style={styles.removeButton} 
+                        onPress={() => onRemoveItem(item.id)}
+                    >
+                        <Text style={styles.removeButtonText}>Remove</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        )}
+        ListEmptyComponent={<Text style={styles.emptyListText}>No menu items available.</Text>}
+    />
+);
+
+// --- 1. HOME SCREEN ---
+interface HomeScreenProps {
+    menuItems: MenuItem[];
+}
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems }) => {
+    const averagePrices = useMemo(() => calculateAveragePrices(menuItems), [menuItems]);
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.header}>Complete Menu</Text>
+            
+            <Text style={styles.subHeader}>Average Price Breakdown (in Rands)</Text>
+            <View style={styles.averageContainer}>
+                {Object.entries(averagePrices).map(([course, avgPrice]) => (
+                    <View key={course} style={styles.priceItem}>
+                        <Text style={styles.priceLabel}>{course} Average:</Text>
+                        <Text style={styles.priceValue}>R{avgPrice}</Text>
+                    </View>
+                ))}
+                {Object.keys(averagePrices).length === 0 && (
+                     <Text style={styles.averageText}>No prices to calculate yet.</Text>
+                )}
+            </View>
+
+            <Text style={styles.subHeader}>All Menu Items</Text>
+            <MenuList items={menuItems} />
+        </View>
+    );
+};
+
+// --- 2. CHEF/ADD ITEMS SCREEN ---
+interface ChefScreenProps {
+    menuItems: MenuItem[];
+    setMenuItems: React.Dispatch<React.SetStateAction<MenuItem[]>>;
+}
+
+const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
+    const [newItemName, setNewItemName] = useState('');
+    const [newItemCourse, setNewItemCourse] = useState(COURSES[0]); 
+    const [newItemPrice, setNewItemPrice] = useState('');
+    const [newItemDescription, setNewItemDescription] = useState(''); 
+
+    // Add Item Function
+    const handleAddItem = useCallback(() => {
+        const priceValue = parseFloat(newItemPrice);
+        if (newItemName.trim() === '' || newItemDescription.trim() === '' || isNaN(priceValue) || priceValue <= 0) {
+            Alert.alert('Error', 'Please enter a valid name, description, and price.');
+            return;
+        }
+
+        const newItem: MenuItem = {
+            id: Date.now().toString(),
+            name: newItemName.trim(),
+            course: newItemCourse, 
+            price: priceValue,
+            description: newItemDescription.trim(), 
+        };
+
+        setMenuItems(prevItems => [...prevItems, newItem]);
+        
+        // Reset inputs
+        setNewItemName('');
+        setNewItemCourse(COURSES[0]);
+        setNewItemPrice('');
+        setNewItemDescription(''); 
+    }, [newItemName, newItemCourse, newItemPrice, newItemDescription, setMenuItems]);
+
+    // Remove Item Function
+    const handleRemoveItem = useCallback((id: string) => {
+        setMenuItems(prevItems => prevItems.filter(item => item.id !== id));
+    }, [setMenuItems]);
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.header}>Chef: Add/Remove Menu Items</Text>
+
+            <View style={styles.cardContainer}> 
+                <Text style={styles.subHeader}>Add New Item</Text>
+                
+                {/* 1. Item Name */}
+                <TextInput
+                    style={styles.input}
+                    placeholder="Item Name"
+                    value={newItemName}
+                    onChangeText={setNewItemName}
+                />
+                
+                {/* 2. Course Dropdown (Picker) */}
+                <View style={styles.pickerContainer}>
+                    <Text style={styles.pickerLabel}>Select Course:</Text>
+                    <Picker
+                        selectedValue={newItemCourse}
+                        onValueChange={(itemValue) => setNewItemCourse(itemValue)}
+                        style={styles.picker}
+                        mode="dropdown"
+                    >
+                        {/* Mapping over the correct COURSES array */}
+                        {COURSES.map(course => (
+                            <Picker.Item key={course} label={course} value={course} />
+                        ))}
+                    </Picker>
+                </View>
+
+                {/* 3. Description Input */}
+                <TextInput
+                    style={[styles.input, styles.descriptionInput]}
+                    placeholder="Item Description (e.g., ingredients, preparation style)"
+                    value={newItemDescription}
+                    onChangeText={setNewItemDescription}
+                    multiline
+                    numberOfLines={3}
+                />
+                
+                {/* 4. Price Input */}
+                <TextInput
+                    style={styles.input}
+                    placeholder="Price (e.g., 150.00 Rands)"
+                    value={newItemPrice}
+                    onChangeText={setNewItemPrice}
+                    keyboardType="numeric"
+                />
+                
+                <TouchableOpacity style={styles.buttonContainer} onPress={handleAddItem}>
+                    <Text style={styles.buttonText}>Add Item to Menu</Text>
+                </TouchableOpacity>
+            </View>
+
+            <Text style={styles.subHeader}>Current Menu & Removal</Text>
+            <MenuList items={menuItems} showRemove={true} onRemoveItem={handleRemoveItem} />
+        </View>
+    );
+};
+
+// --- 3. GUEST/FILTER SCREEN ---
+interface GuestScreenProps {
+    menuItems: MenuItem[];
+}
+
+const GuestScreen: React.FC<GuestScreenProps> = ({ menuItems }) => {
+    const [selectedCourseFilter, setSelectedCourseFilter] = useState('All');
+    
+    // Filtering logic
+    const filteredItems = useMemo(() => {
+        return menuItems.filter(item => 
+            selectedCourseFilter === 'All' || item.course.toLowerCase() === selectedCourseFilter.toLowerCase()
+        );
+    }, [menuItems, selectedCourseFilter]);
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.header}>Guest: Filter Menu</Text>
+            
+            <View style={styles.filterContainer}>
+                {/* Mapping over the static GUEST_FILTER_COURSES array */}
+                {GUEST_FILTER_COURSES.map((courseOption) => (
+                    <TouchableOpacity
+                        key={courseOption}
+                        onPress={() => setSelectedCourseFilter(courseOption)}
+                        style={[
+                            styles.filterButton,
+                            selectedCourseFilter === courseOption && styles.activeFilterButton,
+                        ]}
+                    >
+                        <Text
+                            style={[
+                                styles.filterText,
+                                selectedCourseFilter === courseOption && styles.activeFilterText,
+                            ]}
+                        >
+                            {courseOption}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+
+            <Text style={styles.subHeader}>Showing: {selectedCourseFilter} ({filteredItems.length} items)</Text>
+            <MenuList items={filteredItems} />
+        </View>
+    );
+};
+
+
+// --- MAIN APP COMPONENT ---
+type Screen = 'Home' | 'Chef' | 'Guest';
+
+const App = () => {
+    const [menuItems, setMenuItems] = useState<MenuItem[]>(INITIAL_MENU_ITEMS);
+    const [currentScreen, setCurrentScreen] = useState<Screen>('Home');
+
+    const renderScreen = () => {
+        switch (currentScreen) {
+            case 'Home':
+                return <HomeScreen menuItems={menuItems} />;
+            case 'Chef':
+                return <ChefScreen menuItems={menuItems} setMenuItems={setMenuItems} />;
+            case 'Guest':
+                return <GuestScreen menuItems={menuItems} />;
+            default:
+                return <HomeScreen menuItems={menuItems} />;
+        }
+    };
+
+    return (
+        <View style={styles.safeArea}>
+            {/* Simple Navigation Bar */}
+            <View style={styles.navContainer}>
+                {['Home', 'Chef', 'Guest'].map((screenName) => (
+                    <TouchableOpacity
+                        key={screenName}
+                        style={[
+                            styles.navButton,
+                            currentScreen === screenName && styles.activeNavButton,
+                        ]}
+                        onPress={() => setCurrentScreen(screenName as Screen)}
+                    >
+                        <Text 
+                            style={[
+                                styles.navText,
+                                currentScreen === screenName && styles.activeNavText,
+                            ]}
+                        >
+                            {screenName}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+            {renderScreen()}
+        </View>
+    );
+};
+
+export default App;
