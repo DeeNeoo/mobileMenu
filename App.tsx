@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, Alert, FlatList, TextInput } from 'react-
 import { Picker } from '@react-native-picker/picker'; 
 import { styles } from './styles'; 
 
-// --- DATA STRUCTURE ---
+
+
 interface MenuItem {
     id: string;
     name: string;
@@ -12,12 +13,11 @@ interface MenuItem {
     description: string;
 }
 
-// Global Course Definitions
+//the list of courses
 const COURSES = ['Main', 'Starter', 'Dessert']; 
-// Static filter options for the Guest screen
 const GUEST_FILTER_COURSES = ['All', ...COURSES];
 
-// Initial data adjusted to the new courses (Rands)
+//added menu items for testing
 const INITIAL_MENU_ITEMS: MenuItem[] = [
     { id: '1', name: 'Lasagna', course: 'Main', price: 165.00, description: 'Pasta sheets with mince topped with mozarella cheese.' },
     { id: '2', name: 'Prawns cocktail', course: 'Starter', price: 120.00, description: 'Deep fried prawns in a cup.' },
@@ -25,7 +25,7 @@ const INITIAL_MENU_ITEMS: MenuItem[] = [
     
 ];
 
-// --- REFACTORED LOGIC FUNCTION (Average Price) ---
+//this function calculates the avarage prices for each course
 const calculateAveragePrices = (items: MenuItem[]): Record<string, string> => {
     const courseStats: Record<string, { total: number, count: number }> = {};
     items.forEach(item => {
@@ -45,7 +45,7 @@ const calculateAveragePrices = (items: MenuItem[]): Record<string, string> => {
     return averages;
 };
 
-// --- REUSABLE COMPONENT: Menu List (UPDATED) ---
+
 interface MenuListProps {
     items: MenuItem[];
     showRemove?: boolean;
@@ -59,9 +59,7 @@ const MenuList: React.FC<MenuListProps> = ({ items, showRemove = false, onRemove
         renderItem={({ item }) => (
             <View style={styles.itemContainer}>
                 <View style={styles.itemContent}>
-                    {/* UPDATED LINE: Removed (item.course) from display */}
                     <Text style={styles.itemTitle}>{item.name} : R{item.price.toFixed(2)}</Text>
-                    {/* Display Description */}
                     <Text style={styles.itemDescription}>{item.description}</Text>
                 </View>
                 {showRemove && onRemoveItem && (
@@ -78,7 +76,7 @@ const MenuList: React.FC<MenuListProps> = ({ items, showRemove = false, onRemove
     />
 );
 
-// --- 1. HOME SCREEN ---
+//home screen
 interface HomeScreenProps {
     menuItems: MenuItem[];
 }
@@ -90,7 +88,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems }) => {
         <View style={styles.container}>
             <Text style={styles.header}>Complete Menu</Text>
             
-            <Text style={styles.subHeader}>Average Price Breakdown (in Rands)</Text>
+            <Text style={styles.subHeader}>Average Price Breakdown</Text>
             <View style={styles.averageContainer}>
                 {Object.entries(averagePrices).map(([course, avgPrice]) => (
                     <View key={course} style={styles.priceItem}>
@@ -109,19 +107,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems }) => {
     );
 };
 
-// --- 2. CHEF/ADD ITEMS SCREEN ---
+
+//the chef screen
 interface ChefScreenProps {
     menuItems: MenuItem[];
     setMenuItems: React.Dispatch<React.SetStateAction<MenuItem[]>>;
 }
 
+//input fields for adding menu items
 const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
     const [newItemName, setNewItemName] = useState('');
     const [newItemCourse, setNewItemCourse] = useState(COURSES[0]); 
     const [newItemPrice, setNewItemPrice] = useState('');
     const [newItemDescription, setNewItemDescription] = useState(''); 
 
-    // Add Item Function
+    
     const handleAddItem = useCallback(() => {
         const priceValue = parseFloat(newItemPrice);
         if (newItemName.trim() === '' || newItemDescription.trim() === '' || isNaN(priceValue) || priceValue <= 0) {
@@ -139,14 +139,14 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
 
         setMenuItems(prevItems => [...prevItems, newItem]);
         
-        // Reset inputs
+        
         setNewItemName('');
         setNewItemCourse(COURSES[0]);
         setNewItemPrice('');
         setNewItemDescription(''); 
     }, [newItemName, newItemCourse, newItemPrice, newItemDescription, setMenuItems]);
 
-    // Remove Item Function
+    
     const handleRemoveItem = useCallback((id: string) => {
         setMenuItems(prevItems => prevItems.filter(item => item.id !== id));
     }, [setMenuItems]);
@@ -158,7 +158,7 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
             <View style={styles.cardContainer}> 
                 <Text style={styles.subHeader}>Add New Item</Text>
                 
-                {/* 1. Item Name */}
+                
                 <TextInput
                     style={styles.input}
                     placeholder="Item Name"
@@ -166,7 +166,7 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
                     onChangeText={setNewItemName}
                 />
                 
-                {/* 2. Course Dropdown (Picker) */}
+                
                 <View style={styles.pickerContainer}>
                     <Text style={styles.pickerLabel}>Select Course:</Text>
                     <Picker
@@ -175,14 +175,14 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
                         style={styles.picker}
                         mode="dropdown"
                     >
-                        {/* Mapping over the correct COURSES array */}
+                        
                         {COURSES.map(course => (
                             <Picker.Item key={course} label={course} value={course} />
                         ))}
                     </Picker>
                 </View>
 
-                {/* 3. Description Input */}
+                
                 <TextInput
                     style={[styles.input, styles.descriptionInput]}
                     placeholder="Item Description (e.g., ingredients, preparation style)"
@@ -192,7 +192,7 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
                     numberOfLines={3}
                 />
                 
-                {/* 4. Price Input */}
+                
                 <TextInput
                     style={styles.input}
                     placeholder="Price (e.g., 150.00 Rands)"
@@ -212,7 +212,7 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
     );
 };
 
-// --- 3. GUEST/FILTER SCREEN ---
+//filtering/guest screen
 interface GuestScreenProps {
     menuItems: MenuItem[];
 }
@@ -220,7 +220,7 @@ interface GuestScreenProps {
 const GuestScreen: React.FC<GuestScreenProps> = ({ menuItems }) => {
     const [selectedCourseFilter, setSelectedCourseFilter] = useState('All');
     
-    // Filtering logic
+    
     const filteredItems = useMemo(() => {
         return menuItems.filter(item => 
             selectedCourseFilter === 'All' || item.course.toLowerCase() === selectedCourseFilter.toLowerCase()
@@ -232,7 +232,6 @@ const GuestScreen: React.FC<GuestScreenProps> = ({ menuItems }) => {
             <Text style={styles.header}>Guest: Filter Menu</Text>
             
             <View style={styles.filterContainer}>
-                {/* Mapping over the static GUEST_FILTER_COURSES array */}
                 {GUEST_FILTER_COURSES.map((courseOption) => (
                     <TouchableOpacity
                         key={courseOption}
@@ -261,7 +260,7 @@ const GuestScreen: React.FC<GuestScreenProps> = ({ menuItems }) => {
 };
 
 
-// --- MAIN APP COMPONENT ---
+
 type Screen = 'Home' | 'Chef' | 'Guest';
 
 const App = () => {
@@ -283,7 +282,6 @@ const App = () => {
 
     return (
         <View style={styles.safeArea}>
-            {/* Simple Navigation Bar */}
             <View style={styles.navContainer}>
                 {['Home', 'Chef', 'Guest'].map((screenName) => (
                     <TouchableOpacity
