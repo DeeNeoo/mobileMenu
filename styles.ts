@@ -20,6 +20,15 @@ export const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  // New style for ChefScreen main container
+  chefContainer: { 
+    flex: 1,
+    paddingHorizontal: 20, // Only apply horizontal padding to the scroll view
+  },
+  // New style for ScrollView content container to apply bottom padding
+  scrollContainer: { 
+    paddingBottom: 20,
+  },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -111,6 +120,11 @@ export const styles = StyleSheet.create({
     color: COLORS.PRIMARY_BLACK,
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  // Added style to ensure FlatList renders correctly inside ScrollView on ChefScreen
+  chefMenuList: {
+    minHeight: 1, 
+    flexGrow: 0, 
   },
   emptyListText: {
     textAlign: 'center',

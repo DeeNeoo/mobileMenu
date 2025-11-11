@@ -1,9 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, TouchableOpacity, Alert, FlatList, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, FlatList, TextInput, ScrollView } from 'react-native'; 
 import { Picker } from '@react-native-picker/picker'; 
 import { styles } from './styles'; 
-
-
 
 interface MenuItem {
     id: string;
@@ -14,7 +12,7 @@ interface MenuItem {
 }
 
 //the list of courses
-const COURSES = ['Main', 'Starter', 'Dessert']; 
+const COURSES = ['Starter', 'Main', 'Dessert']; 
 const GUEST_FILTER_COURSES = ['All', ...COURSES];
 
 //added menu items for testing
@@ -22,8 +20,8 @@ const INITIAL_MENU_ITEMS: MenuItem[] = [
     { id: '1', name: 'Lasagna', course: 'Main', price: 165.00, description: 'Pasta sheets with mince topped with mozarella cheese.' },
     { id: '2', name: 'Prawns cocktail', course: 'Starter', price: 120.00, description: 'Deep fried prawns in a cup.' },
     { id: '3', name: 'Tiramisu', course: 'Dessert', price: 150, description: 'A slice of Tiramisu dessert' },
+]
     
-];
 
 //this function calculates the avarage prices for each course
 const calculateAveragePrices = (items: MenuItem[]): Record<string, string> => {
@@ -50,9 +48,10 @@ interface MenuListProps {
     items: MenuItem[];
     showRemove?: boolean;
     onRemoveItem?: (id: string) => void;
+    scrollEnabled?: boolean; 
 }
 
-const MenuList: React.FC<MenuListProps> = ({ items, showRemove = false, onRemoveItem }) => (
+const MenuList: React.FC<MenuListProps> = ({ items, showRemove = false, onRemoveItem, scrollEnabled = true }) => (
     <FlatList
         data={items}
         keyExtractor={item => item.id}
@@ -73,21 +72,23 @@ const MenuList: React.FC<MenuListProps> = ({ items, showRemove = false, onRemove
             </View>
         )}
         ListEmptyComponent={<Text style={styles.emptyListText}>No menu items available.</Text>}
+        style={showRemove ? styles.chefMenuList : undefined} 
+        scrollEnabled={scrollEnabled} 
     />
 );
 
 //home screen
 interface HomeScreenProps {
     menuItems: MenuItem[];
-    onRemoveItem: (id: string) => void;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems, onRemoveItem }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems }) => {
     const averagePrices = useMemo(() => calculateAveragePrices(menuItems), [menuItems]);
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.subHeader}>Average Price Breakdown</Text>
+        
+        <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.container}>
+            <Text style={styles.subHeader}>Average Prices</Text>
             <View style={styles.averageContainer}>
                 {Object.entries(averagePrices).map(([course, avgPrice]) => (
                     <View key={course} style={styles.priceItem}>
@@ -100,9 +101,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems, onRemoveItem }) => {
                 )}
             </View>
 
-            <Text style={styles.subHeader}>All Menu Items</Text>
-            <MenuList items={menuItems} showRemove={true} onRemoveItem={onRemoveItem} />
-        </View>
+            <Text style={styles.subHeader}>Available dishes</Text>
+
+            <MenuList items={menuItems} scrollEnabled={false} />
+        </ScrollView>
     );
 };
 
@@ -111,11 +113,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems, onRemoveItem }) => {
 interface ChefScreenProps {
     menuItems: MenuItem[];
     setMenuItems: React.Dispatch<React.SetStateAction<MenuItem[]>>;
-    onRemoveItem: (id: string) => void;
 }
 
 //input fields for adding menu items
-const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems, onRemoveItem }) => {
+const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
     const [newItemName, setNewItemName] = useState('');
     const [newItemCourse, setNewItemCourse] = useState(COURSES[0]); 
     const [newItemPrice, setNewItemPrice] = useState('');
@@ -146,9 +147,15 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems, onRemo
         setNewItemDescription(''); 
     }, [newItemName, newItemCourse, newItemPrice, newItemDescription, setMenuItems]);
 
+    
+    const handleRemoveItem = useCallback((id: string) => {
+        setMenuItems(prevItems => prevItems.filter(item => item.id !== id));
+    }, [setMenuItems]);
+
+
     return (
-        <View style={styles.container}>
-            <Text style={styles.header}>Chef: Add/Remove Menu Items</Text>
+        <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.chefContainer}>
+            <Text style={styles.header}></Text>
 
             <View style={styles.cardContainer}> 
                 <Text style={styles.subHeader}>Add New Item</Text>
@@ -180,7 +187,7 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems, onRemo
                 
                 <TextInput
                     style={[styles.input, styles.descriptionInput]}
-                    placeholder="Item Description (e.g., ingredients, preparation style)"
+                    placeholder="Item Description"
                     value={newItemDescription}
                     onChangeText={setNewItemDescription}
                     multiline
@@ -190,7 +197,7 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems, onRemo
                 
                 <TextInput
                     style={styles.input}
-                    placeholder="Price (e.g., 150.00 Rands)"
+                    placeholder="Price (150.00 Rands)"
                     value={newItemPrice}
                     onChangeText={setNewItemPrice}
                     keyboardType="numeric"
@@ -201,9 +208,10 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems, onRemo
                 </TouchableOpacity>
             </View>
 
-            <Text style={styles.subHeader}>Current Menu & Removal</Text>
-            <MenuList items={menuItems} showRemove={true} onRemoveItem={onRemoveItem} />
-        </View>
+            <Text style={styles.subHeader}>Added dishes</Text>
+        
+            <MenuList items={menuItems} showRemove={true} onRemoveItem={handleRemoveItem} scrollEnabled={false} />
+        </ScrollView>
     );
 };
 
@@ -224,7 +232,7 @@ const GuestScreen: React.FC<GuestScreenProps> = ({ menuItems }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Guest: Filter Menu</Text>
+            <Text style={styles.header}>Filter Menu</Text>
             
             <View style={styles.filterContainer}>
                 {GUEST_FILTER_COURSES.map((courseOption) => (
@@ -249,7 +257,7 @@ const GuestScreen: React.FC<GuestScreenProps> = ({ menuItems }) => {
             </View>
 
             <Text style={styles.subHeader}>Showing: {selectedCourseFilter} ({filteredItems.length} items)</Text>
-            <MenuList items={filteredItems} />
+            <MenuList items={filteredItems} /> 
         </View>
     );
 };
@@ -262,20 +270,16 @@ const App = () => {
     const [menuItems, setMenuItems] = useState<MenuItem[]>(INITIAL_MENU_ITEMS);
     const [currentScreen, setCurrentScreen] = useState<Screen>('Home');
 
-    const handleRemoveItem = useCallback((id: string) => {
-        setMenuItems(prevItems => prevItems.filter(item => item.id !== id));
-    }, [setMenuItems]);
-
     const renderScreen = () => {
         switch (currentScreen) {
             case 'Home':
-                return <HomeScreen menuItems={menuItems} onRemoveItem={handleRemoveItem} />;
+                return <HomeScreen menuItems={menuItems} />;
             case 'Chef':
-                return <ChefScreen menuItems={menuItems} setMenuItems={setMenuItems} onRemoveItem={handleRemoveItem} />;
+                return <ChefScreen menuItems={menuItems} setMenuItems={setMenuItems} />;
             case 'Guest':
                 return <GuestScreen menuItems={menuItems} />;
             default:
-                return <HomeScreen menuItems={menuItems} onRemoveItem={handleRemoveItem} />;
+                return <HomeScreen menuItems={menuItems} />;
         }
     };
 
