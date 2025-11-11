@@ -79,9 +79,10 @@ const MenuList: React.FC<MenuListProps> = ({ items, showRemove = false, onRemove
 //home screen
 interface HomeScreenProps {
     menuItems: MenuItem[];
+    onRemoveItem: (id: string) => void;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems, onRemoveItem }) => {
     const averagePrices = useMemo(() => calculateAveragePrices(menuItems), [menuItems]);
 
     return (
@@ -100,7 +101,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems }) => {
             </View>
 
             <Text style={styles.subHeader}>All Menu Items</Text>
-            <MenuList items={menuItems} />
+            <MenuList items={menuItems} showRemove={true} onRemoveItem={onRemoveItem} />
         </View>
     );
 };
@@ -110,10 +111,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems }) => {
 interface ChefScreenProps {
     menuItems: MenuItem[];
     setMenuItems: React.Dispatch<React.SetStateAction<MenuItem[]>>;
+    onRemoveItem: (id: string) => void;
 }
 
 //input fields for adding menu items
-const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
+const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems, onRemoveItem }) => {
     const [newItemName, setNewItemName] = useState('');
     const [newItemCourse, setNewItemCourse] = useState(COURSES[0]); 
     const [newItemPrice, setNewItemPrice] = useState('');
@@ -143,11 +145,6 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
         setNewItemPrice('');
         setNewItemDescription(''); 
     }, [newItemName, newItemCourse, newItemPrice, newItemDescription, setMenuItems]);
-
-    
-    const handleRemoveItem = useCallback((id: string) => {
-        setMenuItems(prevItems => prevItems.filter(item => item.id !== id));
-    }, [setMenuItems]);
 
     return (
         <View style={styles.container}>
@@ -205,7 +202,7 @@ const ChefScreen: React.FC<ChefScreenProps> = ({ menuItems, setMenuItems }) => {
             </View>
 
             <Text style={styles.subHeader}>Current Menu & Removal</Text>
-            <MenuList items={menuItems} showRemove={true} onRemoveItem={handleRemoveItem} />
+            <MenuList items={menuItems} showRemove={true} onRemoveItem={onRemoveItem} />
         </View>
     );
 };
@@ -265,16 +262,20 @@ const App = () => {
     const [menuItems, setMenuItems] = useState<MenuItem[]>(INITIAL_MENU_ITEMS);
     const [currentScreen, setCurrentScreen] = useState<Screen>('Home');
 
+    const handleRemoveItem = useCallback((id: string) => {
+        setMenuItems(prevItems => prevItems.filter(item => item.id !== id));
+    }, [setMenuItems]);
+
     const renderScreen = () => {
         switch (currentScreen) {
             case 'Home':
-                return <HomeScreen menuItems={menuItems} />;
+                return <HomeScreen menuItems={menuItems} onRemoveItem={handleRemoveItem} />;
             case 'Chef':
-                return <ChefScreen menuItems={menuItems} setMenuItems={setMenuItems} />;
+                return <ChefScreen menuItems={menuItems} setMenuItems={setMenuItems} onRemoveItem={handleRemoveItem} />;
             case 'Guest':
                 return <GuestScreen menuItems={menuItems} />;
             default:
-                return <HomeScreen menuItems={menuItems} />;
+                return <HomeScreen menuItems={menuItems} onRemoveItem={handleRemoveItem} />;
         }
     };
 
