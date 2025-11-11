@@ -1,238 +1,228 @@
 import { StyleSheet } from 'react-native';
 
 export const COLORS = {
-  PRIMARY_GREEN: '#2E7D32',       // Dark Green (Headers, Main Buttons)
-  ACCENT_GREEN: '#4CAF50',        // Medium Green (Highlight, Active States)
-  BACKGROUND_LIGHT: '#F1F8E9',    // Pale Beige-Green (Main Background)
-  SUCCESS_GREEN: '#388E3C',       // Success/Positive Action
-  ERROR_RED: '#D32F2F',           // Red (Errors, removal)
-  TEXT_DARK: '#333333',           // Dark Text
-  BORDER_LIGHT: '#BDBDBD',        // Light Gray Border
-  OVERLAY: 'rgba(255, 255, 255, 0.8)', // White Overlay
+  PRIMARY_BLACK: '#000000',
+  LIGHT_PINK: '#f7e6eb',
+  PASTEL_PINK: '#e7cfd6',
+  TEXT_PINK: '#f7e6eb',
+  TEXT_DARK: '#1a1a1a',
+  BORDER_LIGHT: '#d8c5cc',
+  OVERLAY: 'rgba(0, 0, 0, 0.1)',
 };
 
 export const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: COLORS.BACKGROUND_LIGHT,
-        paddingTop: 50,
-    },
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-    header: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        color: COLORS.PRIMARY_GREEN,
-        textAlign: 'center',
-    },
-    subHeader: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginTop: 15,
-        marginBottom: 10,
-        color: COLORS.PRIMARY_GREEN,
-    },
-    cardContainer: {
-        marginBottom: 20, 
-        padding: 15, 
-        backgroundColor: '#fff', 
-        borderRadius: 8, 
-        shadowColor: COLORS.TEXT_DARK, 
-        shadowOffset: { width: 0, height: 2 }, 
-        shadowOpacity: 0.1, 
-        shadowRadius: 4, 
-        elevation: 3 
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: COLORS.BORDER_LIGHT,
-        borderRadius: 8,
-        padding: 10,
-        marginBottom: 10,
-        width: '100%',
-        color: COLORS.TEXT_DARK,
-        backgroundColor: '#fff',
-    },
-    // NEW: Style for multiline description input
-    descriptionInput: {
-        height: 80, 
-        textAlignVertical: 'top',
-        paddingTop: 10,
-    },
-    buttonContainer: {
-        backgroundColor: COLORS.ACCENT_GREEN,
-        padding: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    
-    // --- ITEM LIST STYLES (UPDATED) ---
-    itemContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 15,
-        marginVertical: 5,
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        shadowColor: COLORS.TEXT_DARK,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    itemContent: {
-        flex: 1, 
-        marginRight: 10,
-    },
-    itemTitle: {
-        fontSize: 16,
-        color: COLORS.TEXT_DARK,
-        fontWeight: 'bold',
-    },
-    // NEW: Style for description text
-    itemDescription: {
-        fontSize: 13,
-        color: '#555',
-        marginTop: 4,
-    },
-    removeButton: {
-        backgroundColor: COLORS.ERROR_RED,
-        paddingVertical: 6,
-        paddingHorizontal: 10,
-        borderRadius: 5,
-        marginLeft: 10,
-    },
-    removeButtonText: {
-        color: '#fff',
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    emptyListText: {
-        textAlign: 'center',
-        marginTop: 20,
-        color: COLORS.TEXT_DARK,
-        fontSize: 16,
-    },
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.LIGHT_PINK,
+    paddingTop: 50,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: COLORS.PRIMARY_BLACK,
+    textAlign: 'center',
+  },
+  subHeader: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 15,
+    marginBottom: 10,
+    color: COLORS.PRIMARY_BLACK,
+  },
+  cardContainer: {
+    marginBottom: 20,
+    padding: 15,
+    backgroundColor: COLORS.PASTEL_PINK,
+    borderRadius: 8,
+    shadowColor: COLORS.TEXT_DARK,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: COLORS.BORDER_LIGHT,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    width: '100%',
+    color: COLORS.TEXT_DARK,
+    backgroundColor: COLORS.LIGHT_PINK,
+  },
+  descriptionInput: {
+    height: 80,
+    textAlignVertical: 'top',
+    paddingTop: 10,
+  },
+  buttonContainer: {
+    backgroundColor: COLORS.PRIMARY_BLACK,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: COLORS.LIGHT_PINK,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    marginVertical: 5,
+    backgroundColor: COLORS.PRIMARY_BLACK,
+    borderRadius: 8,
+    shadowColor: COLORS.TEXT_DARK,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  itemContent: {
+    flex: 1,
+    marginRight: 10,
+  },
+  itemTitle: {
+    fontSize: 16,
+    color: COLORS.TEXT_PINK,
+    fontWeight: 'bold',
+  },
+  itemDescription: {
+    fontSize: 13,
+    color: COLORS.LIGHT_PINK,
+    marginTop: 4,
+  },
+  removeButton: {
+    backgroundColor: COLORS.PASTEL_PINK,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  removeButtonText: {
+    color: COLORS.PRIMARY_BLACK,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  emptyListText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: COLORS.PRIMARY_BLACK,
+    fontSize: 16,
+  },
 
-    // --- NEW STYLES FOR PICKER (Dropdown) ---
-    pickerContainer: {
-        borderWidth: 1,
-        borderColor: COLORS.BORDER_LIGHT,
-        borderRadius: 8,
-        marginBottom: 10,
-        backgroundColor: '#fff',
-        overflow: 'hidden', // Ensures the picker respects the border radius
-    },
-    pickerLabel: {
-        fontSize: 14,
-        color: COLORS.TEXT_DARK,
-        paddingHorizontal: 10,
-        paddingTop: 5,
-        backgroundColor: '#f9f9f9',
-        fontWeight: '500',
-    },
-    picker: {
-        height: 40,
-        width: '100%',
-        color: COLORS.TEXT_DARK,
-        backgroundColor: '#fff',
-    },
-    
-    // --- NAVIGATION STYLES ---
-    navContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        padding: 10,
-        backgroundColor: COLORS.PRIMARY_GREEN,
-        borderBottomWidth: 2,
-        borderBottomColor: COLORS.SUCCESS_GREEN,
-    },
-    navButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        borderRadius: 5,
-    },
-    activeNavButton: {
-        backgroundColor: '#FFEB3B', 
-    },
-    navText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    activeNavText: {
-        color: COLORS.TEXT_DARK,
-        fontWeight: 'bold',
-    },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: COLORS.BORDER_LIGHT,
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: COLORS.LIGHT_PINK,
+  },
+  pickerLabel: {
+    fontSize: 14,
+    color: COLORS.PRIMARY_BLACK,
+    paddingHorizontal: 10,
+    paddingTop: 5,
+    backgroundColor: COLORS.PASTEL_PINK,
+    fontWeight: '500',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+    color: COLORS.PRIMARY_BLACK,
+    backgroundColor: COLORS.LIGHT_PINK,
+  },
 
-    // --- AVERAGE PRICE STYLES ---
-    averageContainer: {
-        marginBottom: 20, 
-        padding: 15, 
-        backgroundColor: COLORS.BACKGROUND_LIGHT,
-        borderRadius: 8, 
-        borderLeftWidth: 5, 
-        borderLeftColor: COLORS.SUCCESS_GREEN,
-    },
-    priceItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#dcedc8',
-    },
-    priceLabel: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: COLORS.TEXT_DARK,
-    },
-    priceValue: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: COLORS.SUCCESS_GREEN,
-    },
-    averageText: {
-        fontSize: 14,
-        color: COLORS.TEXT_DARK,
-        textAlign: 'center',
-    },
+  navContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
+    backgroundColor: COLORS.PRIMARY_BLACK,
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.PASTEL_PINK,
+  },
+  navButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  activeNavButton: {
+    backgroundColor: COLORS.LIGHT_PINK,
+  },
+  navText: {
+    color: COLORS.LIGHT_PINK,
+    fontWeight: 'bold',
+  },
+  activeNavText: {
+    color: COLORS.PRIMARY_BLACK,
+    fontWeight: 'bold',
+  },
 
-    // --- FILTERING UI STYLES ---
-    filterContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'flex-start',
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.BORDER_LIGHT,
-        marginBottom: 10,
-    },
-    filterButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 20,
-        backgroundColor: COLORS.BORDER_LIGHT,
-        marginRight: 8,
-        marginBottom: 8,
-    },
-    filterText: {
-        color: COLORS.TEXT_DARK,
-        fontSize: 14,
-    },
-    activeFilterButton: {
-        backgroundColor: COLORS.PRIMARY_GREEN,
-    },
-    activeFilterText: {
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
+  averageContainer: {
+    marginBottom: 20,
+    padding: 15,
+    backgroundColor: COLORS.LIGHT_PINK,
+    borderRadius: 8,
+    borderLeftWidth: 5,
+    borderLeftColor: COLORS.PASTEL_PINK,
+  },
+  priceItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.PASTEL_PINK,
+  },
+  priceLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: COLORS.PRIMARY_BLACK,
+  },
+  priceValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.PRIMARY_BLACK,
+  },
+  averageText: {
+    fontSize: 14,
+    color: COLORS.PRIMARY_BLACK,
+    textAlign: 'center',
+  },
+
+  filterContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.BORDER_LIGHT,
+    marginBottom: 10,
+  },
+  filterButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    backgroundColor: COLORS.PASTEL_PINK,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  filterText: {
+    color: COLORS.PRIMARY_BLACK,
+    fontSize: 14,
+  },
+  activeFilterButton: {
+    backgroundColor: COLORS.PRIMARY_BLACK,
+  },
+  activeFilterText: {
+    color: COLORS.LIGHT_PINK,
+    fontWeight: 'bold',
+  },
 });

@@ -86,8 +86,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Complete Menu</Text>
-            
             <Text style={styles.subHeader}>Average Price Breakdown</Text>
             <View style={styles.averageContainer}>
                 {Object.entries(averagePrices).map(([course, avgPrice]) => (
