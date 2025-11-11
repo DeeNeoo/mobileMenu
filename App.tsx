@@ -88,6 +88,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ menuItems }) => {
     return (
         
         <ScrollView contentContainerStyle={styles.scrollContainer} style={styles.container}>
+            <Text style={styles.header}>Christofell's mobile menu</Text>
             <Text style={styles.subHeader}>Average Prices</Text>
             <View style={styles.averageContainer}>
                 {Object.entries(averagePrices).map(([course, avgPrice]) => (
